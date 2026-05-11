@@ -6,6 +6,8 @@
 
 set -euo pipefail
 
+DOMAIN=""
+
 # ── Colores ──────────────────────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -43,6 +45,9 @@ check_command() {
 }
 
 ask_domain() {
+    if [[ -n "${DOMAIN:-}" ]]; then
+        return 0
+    fi
     local prompt="${1:-Ingresa el dominio}"
     read -rp "$(echo -e "${YELLOW}${prompt}: ${NC}")" DOMAIN
     if [[ -z "$DOMAIN" ]]; then
@@ -338,18 +343,19 @@ usage() {
 # ── Ejecución desde CLI ──────────────────────────────────────────────
 
 if [[ $# -ge 1 ]]; then
+    DOMAIN="${2:-}"
     case "$1" in
-        lookup)      DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_lookup <<< "" || dns_lookup ;;
-        type)        DOMAIN="${2:-}"; dns_lookup_tipo ;;
-        reverse)     DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_reverse <<< "" || dns_reverse ;;
-        propagation) DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_propagation <<< "" || dns_propagation ;;
-        whois)       DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_whois <<< "" || dns_whois ;;
-        trace)       DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_trace <<< "" || dns_trace ;;
-        ns)          DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_nameservers <<< "" || dns_nameservers ;;
-        axfr)        DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_axfr <<< "" || dns_axfr ;;
-        compare)     DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_compare <<< "" || dns_compare ;;
-        security)    DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_security <<< "" || dns_security ;;
-        report)      DOMAIN="${2:-}"; [[ -n "$DOMAIN" ]] && dns_full_report <<< "" || dns_full_report ;;
+        lookup)      dns_lookup ;;
+        type)        dns_lookup_tipo ;;
+        reverse)     dns_reverse ;;
+        propagation) dns_propagation ;;
+        whois)       dns_whois ;;
+        trace)       dns_trace ;;
+        ns)          dns_nameservers ;;
+        axfr)        dns_axfr ;;
+        compare)     dns_compare ;;
+        security)    dns_security ;;
+        report)      dns_full_report ;;
         -h|--help)   usage ;;
         *)           print_error "Opción desconocida: $1"; usage; exit 1 ;;
     esac
@@ -361,6 +367,7 @@ fi
 while true; do
     show_menu
     read -rp "$(echo -e "${YELLOW}Selecciona una opción: ${NC}")" opcion
+    DOMAIN=""
     case "$opcion" in
         1)  dns_lookup ;;
         2)  dns_lookup_tipo ;;
